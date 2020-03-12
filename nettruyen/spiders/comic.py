@@ -5,7 +5,7 @@ from w3lib.html import remove_tags
 from nettruyen.helpers.category_item import CategoryItem
 from nettruyen.helpers.comic import Comic
 import json
-# from scrapy.shell import inspect_response
+from scrapy.linkextractors import LinkExtractor
 
 
 class ComicSpider(scrapy.Spider):
@@ -33,15 +33,8 @@ class ComicSpider(scrapy.Spider):
         link = response.meta.get("link")
         # from scrapy.shell import inspect_response
         # inspect_response(response,self)
-        # pagination_list = response.xpath("//div[@class = 'pagination-outter']/ul[@class = 'pagination']/li[@class = 'PagerSSCCells']").getall()
-        # array_pagi = list(map(remove_tags,pagination_list))
-        # array_pagination = list(map(lambda x:int(x),array_pagi))
-        # max_array_pagination = int(max(array_pagination))
-        # pagination_amount = max_array_pagination if max_array_pagination is not None else 50
-        i = 1
-        while i < 20:
-            yield Request(url = link+"?page="+str(i),callback=self.parse_comic_item,meta = {"item":name})
-            i = i + 1
+        yield Request(url = link+"?page=1",callback=self.parse_comic_item,meta = {"item":name})
+           
 
     def parse_comic_item(self,response):
         category_name = response.meta.get("item")
@@ -52,6 +45,10 @@ class ComicSpider(scrapy.Spider):
 
         for i in range(len(intro_links)):
             yield Comic(intro_titles[i],category_name,intro_images[i],intro_links[i]).__dict__
+
+        next_page = LinkExtractor(restrict_xpaths="//div[@class = 'pagination-outter']/ul[@class = 'pagination']/li/a[@class = 'next-page']").extract_links(response)
+        if next_page is not None:
+            yield Request(url = next_page[0].url,callback=self.parse_comic_item,meta = {"item":category_name})
         
        
 

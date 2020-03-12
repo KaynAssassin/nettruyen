@@ -26,7 +26,6 @@
 import pymongo
 from scrapy.exceptions import DropItem
 
-
 class MongoDBPipeline(object):
     
     def __init__(self):
