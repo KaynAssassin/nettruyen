@@ -24,8 +24,6 @@ class CategoryitemSpider(scrapy.Spider):
         for item in records:
             yield Request(url=item[2],callback= self.parse_list_Comic,meta = {"item":item[0]})
     
-      
-       
         
     def parse_list_Comic(self,response):
         cate_id = response.meta.get("item")
