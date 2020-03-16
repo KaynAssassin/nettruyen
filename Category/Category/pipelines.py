@@ -6,24 +6,25 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-import psycopg2
+import pymongo
+from scrapy.exceptions import DropItem
 
-
-class CatePipeline(object):
-
-    def open_spider(self, spider):
-        hostname = 'localhost'
-        username = 'kayn'
-        password = 'starvn66' # your password
-        database = 'ComicCrawler'
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        self.cur = self.connection.cursor()
-
-    def close_spider(self, spider):
-        self.cur.close()
-        self.connection.close()
+class MongoDBPipeline(object):
+    
+    def __init__(self):
+        connection = pymongo.MongoClient(
+            'localhost',
+            27017
+        )
+        db = connection["ComicCrawler"]
+        self.collection = db["Category"]
 
     def process_item(self, item, spider):
-        self.cur.execute("insert into Category(categoryName,categoryLink) values(%s,%s)",(item['categoryName'],item['categoryLink']))
-        self.connection.commit()
+        valid = True
+        for data in item:
+            if not data:
+                valid = False
+                raise DropItem("Missing {0}!".format(data))
+        if valid:
+            self.collection.insert(dict(item))
         return item
