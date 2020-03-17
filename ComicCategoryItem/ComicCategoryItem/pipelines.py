@@ -5,25 +5,25 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-import psycopg2
+import pymongo
+from scrapy.exceptions import DropItem
 
-
-class ComicCategoryPipeline(object):
-
-    def open_spider(self, spider):
-        hostname = 'localhost'
-        username = 'kayn'
-        password = 'starvn66' # your password
-        database = 'ComicCrawler'
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        self.cur = self.connection.cursor()
-        self.connection.autocommit = True
-
-    def close_spider(self, spider):
-        self.cur.close()
-        self.connection.close()
+class MongoDBPipeline(object):
+    
+    def __init__(self):
+        connection = pymongo.MongoClient(
+            'localhost',
+            27017
+        )
+        db = connection["ComicCrawler"]
+        self.collection = db["Comic"]
 
     def process_item(self, item, spider):
-        self.cur.execute("insert into ComicCategoryItem(categoryID , lastModified,lastUpdate, linkCrawl , introImage , nameComic) values(%s,%s,%s,%s,%s,%s)",(item['categoryID'],item["lastModified"],item['lastUpdate'],item["linkCrawl"],item["introImage"],item["nameComic"]))
-        self.connection.commit()
+        valid = True
+        for data in item:
+            if not data:
+                valid = False
+                raise DropItem("Missing {0}!".format(data))
+        if valid:
+            self.collection.insert(dict(item))
         return item

@@ -65,7 +65,7 @@ DOWNLOAD_DELAY = 3
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'ComicCategoryItem.pipelines.ComicCategoryPipeline': 300,
+   'ComicCategoryItem.pipelines.MongoDBPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
