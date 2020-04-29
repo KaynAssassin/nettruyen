@@ -10,6 +10,7 @@ class CategoriesSpider(scrapy.Spider):
     allowed_domains = ['nettruyen.com']
     start_urls = ['http://www.nettruyen.com/tim-truyen']
 
+    
     def start_requests(self):
         for i in self.start_urls:
             yield Request(url=i,callback = self.parse_category)
@@ -26,4 +27,7 @@ class CategoriesSpider(scrapy.Spider):
         list_items = list(map(lambda x:x.__dict__,list_category_item))
         for i in list_items:
             yield i
+    
+    def closed(self,reason):
+        print("helloxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
     
